@@ -1,4 +1,11 @@
-# Vetuste Scripteur
+---
+title: Vetuste Scripteur
+emoji: 📜
+colorFrom: yellow
+colorTo: orange
+sdk: docker
+pinned: false
+---
 
 Transforme une phrase en français moderne en vieux français façon **Les Visiteurs** — ni académique, ni exact, entièrement drolatique.
 
