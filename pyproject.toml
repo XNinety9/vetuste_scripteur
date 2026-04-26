@@ -1,0 +1,16 @@
+[project]
+name = "vetuste-scripteur"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.136.1",
+    "fr-core-news-sm",
+    "spacy>=3.8.13",
+    "uvicorn>=0.46.0",
+    "verbecc>=2.0.2",
+]
+
+[tool.uv.sources]
+fr-core-news-sm = { url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl" }
