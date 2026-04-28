@@ -23,9 +23,12 @@ nlp = spacy.load("fr_core_news_sm")
 _conj = CompleteConjugator(lang="fr")
 _conj_cache: dict[str, dict | None] = {}
 
+__version__ = "1.0.0"
+
 app = FastAPI(
     title="Vetuste Scripteur",
     description="Transforme le français moderne en vieux français façon Les Visiteurs",
+    version=__version__,
 )
 
 # ─── DICTIONNAIRES ────────────────────────────────────────────────────────────
@@ -68,7 +71,7 @@ WORD_SUBSTITUTIONS: dict[str, str | list[str]] = {
     "rien": "néant",
     "jamais": "oneques",
     # ── Prépositions & conjonctions ─────────────────────────────────────────
-    "dans": "en",
+    "dans": ["en", "dedans"],
     "sur": "sus",
     "sous": "dessouz",
     "vers": "devers",
@@ -158,8 +161,8 @@ WORD_SUBSTITUTIONS: dict[str, str | list[str]] = {
     # ── Adjectifs ──────────────────────────────────────────────────────────
     "grand": "gran",
     "grande": "gran",
-    "mauvais": "meschant",
-    "mauvaise": "meschante",
+    "mauvais": ["meschant", "maulvais"],
+    "mauvaise": ["meschante", "maulvaise"],
     "beau": "beau",
     "belle": "belle",
     "rouge": "vermeil",
@@ -174,10 +177,20 @@ WORD_SUBSTITUTIONS: dict[str, str | list[str]] = {
     "fort": "puissant",
     "lourd": "pesant",
     "léger": "léger",
-    "chaud": "ardent",
+    "autre": "aultre",
+    "autres": "aultres",
+    "faute": "faulte",
+    "fautes": "faultes",
+    "chaud": ["ardent", "chaulx"],
     "froid": "glacial",
     "riche": "opulent",
     "pauvre": "misérable",
+    "téméraire": "orguillex",
+    "téméraires": "orguillex",
+    "souffrant": "dolent",
+    "souffrante": "dolente",
+    # ── Noms supplémentaires ────────────────────────────────────────────────
+    "fille": "pucele",
     # ── Objets modernes → anachronismes pittoresques ────────────────────────
     "voiture": ["carriole", "charriotte"],
     "automobile": "carriole",
@@ -234,7 +247,8 @@ VERB_SUBSTITUTIONS: dict[str, str] = {
     "arriver": "survenir",
     "entrer": "pénétrer",
     "sortir": "s'échapper",
-    "diner": "mangeailler"
+    "diner": "mangeailler",
+    "convoquer": "mander",
 }
 
 EXCLAMATIONS: list[str] = [
@@ -289,7 +303,7 @@ _ÊTRE_ARCHAIC: dict[tuple, str] = {
     ("1", "Sing", "Pres"): "estoy",
     ("2", "Sing", "Pres"): "estes",
     ("3", "Sing", "Pres"): "estoy",
-    ("1", "Plur", "Pres"): "estons",
+    ("1", "Plur", "Pres"): "somes",
     ("2", "Plur", "Pres"): "estez",
     ("3", "Plur", "Pres"): "estoient",
     ("1", "Sing", "Imp"):  "estois",
@@ -308,6 +322,10 @@ _VOWEL_T_RE = re.compile(
     r"([aeiouàâéèêëîïôùûüæœAEIOUÀÂÉÈÊËÎÏÔÙÛÜ])t(?![tr])"
 )
 
+# Regex pour le passage s → z entre deux voyelles (phonologie médiévale)
+_VOWELS = "aeiouàâéèêëîïôùûüæœAEIOUÀÂÉÈÊËÎÏÔÙÛÜÆŒ"
+_INTERV_S_RE = re.compile(rf"(?<=[{_VOWELS}])s(?=[{_VOWELS}])")
+
 
 def _apply_oy_pres(form: str) -> str:
     """Suffixe -oy pour les finales verbales du présent (style Les Visiteurs)."""
@@ -317,13 +335,18 @@ def _apply_oy_pres(form: str) -> str:
 
 
 def _archaic_chars(word: str) -> str:
-    """Transformations orthographiques aléatoires : i→y, u→v, voyelle+t → voyelle+st."""
+    """Transformations orthographiques aléatoires : i→y, u→v, j→i, voyelle+t → voyelle+st, s intervocalique → z."""
     # Insertion du 's' avant tout 't' solitaire précédé d'une voyelle
     word = _VOWEL_T_RE.sub(r"\1st", word)
+    # s intervocalique → z (phonologie médiévale, ex: "chose" → "choze")
+    if random.random() < 0.70:
+        word = _INTERV_S_RE.sub("z", word)
     # Remplacement aléatoire lettre par lettre
     out = []
     for ch in word:
-        if   ch == 'i' and random.random() < 0.40: out.append('y')
+        if   ch == 'j' and random.random() < 0.80: out.append('i')
+        elif ch == 'J' and random.random() < 0.80: out.append('I')
+        elif ch == 'i' and random.random() < 0.40: out.append('y')
         elif ch == 'I' and random.random() < 0.40: out.append('Y')
         elif ch == 'u' and random.random() < 0.30: out.append('v')
         elif ch == 'U' and random.random() < 0.30: out.append('V')
@@ -484,6 +507,13 @@ def _transform_token(token) -> str:
 
     if token.is_space or token.is_punct:
         return text
+
+    # Article défini masculin singulier "le" → "li" (ancienne forme)
+    if token.pos_ == "DET" and lower == "le" and random.random() < 0.60:
+        gender = (token.morph.get("Gender") or [""])[0]
+        number = (token.morph.get("Number") or [""])[0]
+        if gender == "Masc" and number == "Sing":
+            return _archaic_chars(_preserve_case(text, "li"))
 
     # Verbes en premier
     if token.pos_ in ("VERB", "AUX"):
@@ -706,6 +736,16 @@ _HTML = """\
       transition: background 0.15s;
     }
     .example-pill:hover { background: rgba(139,69,19,0.20); }
+
+    .colophon {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #9a6030;
+      margin-top: 2.2rem;
+      font-style: italic;
+      opacity: 0.65;
+      letter-spacing: 0.03em;
+    }
   </style>
 </head>
 <body>
@@ -742,6 +782,8 @@ _HTML = """\
       <span class="example-pill">Madame, vous êtes très belle</span>
       <span class="example-pill">Je cherchais mon portable</span>
     </div>
+
+    <p class="colophon">⁂ Escript par li maistre grimoire en l'an de grâce MMXXVI &mdash; Traité de transmogréfication, édition %%VERSION%% ⁂</p>
   </div>
 
   <script>
@@ -780,6 +822,7 @@ _HTML = """\
 </body>
 </html>
 """
+_HTML = _HTML.replace("%%VERSION%%", __version__)
 
 
 @app.get("/", response_class=HTMLResponse)
