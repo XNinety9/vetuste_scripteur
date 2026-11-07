@@ -12,3 +12,5 @@ wheels/
 .mypy_cache
 .python_version
 verbecc.log
+# Archive générée
+*.pyz

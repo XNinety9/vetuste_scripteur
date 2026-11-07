@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vetuste Scripteur</title>
+  <style>
+    /* Les fontes sont servies par l'application : la page fonctionne sans Internet. */
+    @font-face {
+      font-family: 'UnifrakturMaguntia';
+      src: url('/fonts/UnifrakturMaguntia-Book.ttf') format('truetype');
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Crimson Text';
+      src: url('/fonts/CrimsonText-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Crimson Text';
+      src: url('/fonts/CrimsonText-Italic.ttf') format('truetype');
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Crimson Text';
+      src: url('/fonts/CrimsonText-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #e8d5a3;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(180,130,60,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 90%, rgba(120,60,20,0.12) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      font-family: 'Crimson Text', Georgia, serif;
+      color: #2c1a0e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .parchment {
+      width: 100%;
+      max-width: 760px;
+      background: linear-gradient(160deg, #fdf3d7 0%, #f5e6b8 50%, #ecdaa0 100%);
+      border-radius: 4px;
+      padding: 3rem 3.5rem;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.25),
+        0 8px 24px rgba(80,40,10,0.20),
+        inset 0 0 60px rgba(180,130,60,0.08);
+      border: 1px solid #c9a84c;
+      position: relative;
+    }
+
+    /* Coins décoratifs */
+    .parchment::before, .parchment::after {
+      content: '✦';
+      position: absolute;
+      font-size: 1.2rem;
+      color: #8b4513;
+      opacity: 0.4;
+    }
+    .parchment::before { top: 1rem; left: 1.2rem; }
+    .parchment::after  { bottom: 1rem; right: 1.2rem; }
+
+    @media (max-width: 560px) {
+      body { padding: 1rem 0.5rem 2rem; }
+      .parchment { padding: 2rem 1.25rem; }
+    }
+
+    h1 {
+      font-family: 'UnifrakturMaguntia', 'Palatino Linotype', serif;
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      text-align: center;
+      color: #5c1a0a;
+      margin: 0 0 0.25rem;
+      letter-spacing: 0.02em;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.18);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-style: italic;
+      color: #7a4a20;
+      font-size: 1.05rem;
+      margin: 0 0 2rem;
+    }
+
+    .divider {
+      text-align: center;
+      color: #8b4513;
+      font-size: 1.1rem;
+      letter-spacing: 0.6em;
+      margin: 1.5rem 0;
+      opacity: 0.5;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #5c2e0a;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid #b8924a;
+      border-radius: 3px;
+      background: rgba(255,248,220,0.7);
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1.15rem;
+      color: #2c1a0e;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    textarea:focus {
+      border-color: #7a3a10;
+      box-shadow: 0 0 0 2px rgba(122,58,16,0.15);
+    }
+    textarea::placeholder { color: #b09060; font-style: italic; }
+
+    .btn-wrap { text-align: center; margin: 1.2rem 0 0; }
+
+    .level { margin-top: 1rem; }
+    .level input { width: 100%; accent-color: #7a2a0a; cursor: pointer; }
+    .level-name { font-style: italic; color: #7a4a20; }
+    .level label { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .level-name { text-transform: none; font-weight: 400; letter-spacing: 0; }
+
+    .actions {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .actions.visible { display: flex; }
+    button.secondary {
+      padding: 0.4rem 1rem;
+      background: rgba(139,69,19,0.10);
+      color: #5c2e0a;
+      border: 1px solid rgba(139,69,19,0.45);
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+      box-shadow: none;
+    }
+    button.secondary:hover { background: rgba(139,69,19,0.22); }
+
+    .illum-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0.4rem 1rem;
+      background: rgba(139,69,19,0.10);
+      border: 1px solid rgba(139,69,19,0.45);
+      border-radius: 3px;
+      font-size: 0.98rem;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+    }
+    .illum-toggle:hover { background: rgba(139,69,19,0.22); }
+    .illum-toggle input { accent-color: #7a2a0a; margin: 0; cursor: pointer; }
+
+    #illumination { display: none; width: 100%; height: auto; box-shadow: 0 2px 8px rgba(60,30,5,0.35); }
+    .result-box.illuminated #illumination { display: block; }
+    .result-box.illuminated .result-text,
+    .result-box.illuminated .result-label { display: none; }
+    .result-box.illuminated { padding: 0.75rem; }
+
+    button {
+      padding: 0.7rem 2.4rem;
+      background: linear-gradient(180deg, #7a2a0a 0%, #5c1a05 100%);
+      color: #f5e6b8;
+      border: 1px solid #3c0f02;
+      border-radius: 3px;
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    button:hover  { background: linear-gradient(180deg, #9a3a10 0%, #7a2a05 100%); }
+    button:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+    .result-box {
+      margin-top: 1.5rem;
+      padding: 1.2rem 1.4rem;
+      background: rgba(255,248,215,0.5);
+      border: 1.5px solid #b8924a;
+      border-radius: 3px;
+      min-height: 80px;
+    }
+    .result-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #7a4a20;
+      margin-bottom: 0.6rem;
+    }
+    .result-text {
+      font-size: 1.25rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: #2c1a0e;
+    }
+    .result-placeholder { color: #b09060; font-style: italic; font-size: 1rem; }
+
+    .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2px solid #c9a84c;
+      border-top-color: #7a2a0a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0.5rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .examples {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #7a5030;
+    }
+    .examples strong { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .example-pill {
+      display: inline-block;
+      background: rgba(139,69,19,0.10);
+      border: 1px solid rgba(139,69,19,0.25);
+      border-radius: 2px;
+      padding: 0.2rem 0.6rem;
+      margin: 0.2rem;
+      cursor: pointer;
+      font-style: italic;
+      transition: background 0.15s;
+    }
+    .example-pill:hover { background: rgba(139,69,19,0.20); }
+
+    .colophon {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #9a6030;
+      margin-top: 2.2rem;
+      font-style: italic;
+      opacity: 0.65;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="parchment">
+    <h1>Vetuste Scripteur</h1>
+    <p class="subtitle">Transformez votre langue vulgaire en vieux parler d'antan !</p>
+    <div class="divider">⚜ ⚜ ⚜</div>
+
+    <form id="form">
+      <label for="input">Français moderne</label>
+      <textarea id="input" placeholder="Saisissez votre phrase ici…" autocomplete="off" maxlength="%%LONGUEUR_MAX%%"></textarea>
+      <div class="level">
+        <label for="level">Vétusté <span class="level-name" id="level-name"></span></label>
+        <input type="range" id="level" min="0" max="3" step="1" value="2">
+      </div>
+      <div class="btn-wrap">
+        <button type="submit">✦ Transmogrifier ✦</button>
+      </div>
+    </form>
+
+    <div class="spinner" id="spinner"></div>
+
+    <div class="result-box" id="result-box">
+      <div class="result-label">Vieux parler</div>
+      <div class="result-text" id="result-text">
+        <span class="result-placeholder">Votre texte transformé apparaîtra ici…</span>
+      </div>
+      <div id="illumination-wrap"><img id="illumination" alt=""></div>
+      <div class="actions" id="actions">
+        <label class="illum-toggle"><input type="checkbox" id="illuminate"> Enluminure</label>
+        <button type="button" class="secondary" id="again">Retransmogrifier</button>
+        <button type="button" class="secondary" id="share">Copier le lien</button>
+        <button type="button" class="secondary" id="image">Enregistrer le parchemin</button>
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top:2rem">· · ·</div>
+
+    <div class="examples">
+      <strong>Exemples à essayer</strong>
+      <span class="example-pill">Je mange une pomme dans le jardin</span>
+      <span class="example-pill">Mon ami travaille beaucoup</span>
+      <span class="example-pill">Il ne buvait pas assez d'eau</span>
+      <span class="example-pill">Tu regardais la télévision</span>
+      <span class="example-pill">Madame, vous êtes très belle</span>
+      <span class="example-pill">Je cherchais mon portable</span>
+    </div>
+
+    <p class="colophon">⁂ Escript par li maistre grimoire en l'an de grâce MMXXVI &mdash; Traité de transmogréfication, édition %%VERSION%% ⁂</p>
+  </div>
+
+  <script>
+    const form      = document.getElementById('form');
+    const input     = document.getElementById('input');
+    const result    = document.getElementById('result-text');
+    const spinner   = document.getElementById('spinner');
+    const level     = document.getElementById('level');
+    const levelName = document.getElementById('level-name');
+    const actions   = document.getElementById('actions');
+    const share     = document.getElementById('share');
+
+    const LEVEL_NAMES = ['vocabulaire seul', 'léger accent', 'Les Visiteurs', 'grimoire illisible'];
+    let current = null;  // la dernière réponse du serveur
+    let requestId = 0;   // seule la réponse à la dernière demande s'affiche
+
+    function showLevel() { levelName.textContent = LEVEL_NAMES[level.value]; }
+
+    function shareUrl() {
+      const params = new URLSearchParams({
+        phrase: current.original, seed: current.seed, level: current.level,
+      });
+      if (toggle.checked) params.set('illum', '1');
+      return location.origin + '/?' + params;
+    }
+
+    async function transmogrify(seed) {
+      const phrase = input.value.trim();
+      if (!phrase) return;
+
+      const id = ++requestId;
+      spinner.style.display = 'block';
+      const params = new URLSearchParams({ phrase, level: level.value });
+      if (seed !== undefined && seed !== null) params.set('seed', seed);
+
+      try {
+        const res = await fetch('/translate?' + params);
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        if (id !== requestId) return;
+        current = data;
+        result.textContent = data.result;
+        actions.classList.add('visible');
+        history.replaceState(null, '', shareUrl());
+        renderView();
+      } catch (err) {
+        if (id !== requestId) return;
+        current = null;
+        result.textContent = 'Erreur de transmogrification, messire.';
+        actions.classList.remove('visible');
+        renderView();
+      } finally {
+        if (id === requestId) spinner.style.display = 'none';
+      }
+    }
+
+    // Clic sur un exemple
+    document.querySelectorAll('.example-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        input.value = pill.textContent;
+        transmogrify();
+      });
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      transmogrify();
+    });
+
+    document.getElementById('again').addEventListener('click', () => transmogrify());
+
+    level.addEventListener('input', () => {
+      showLevel();
+      // Le même tirage, plus ou moins vieilli.
+      if (current && input.value.trim() === current.original) transmogrify(current.seed);
+    });
+
+    share.addEventListener('click', async () => {
+      const label = share.textContent;
+      try {
+        await navigator.clipboard.writeText(shareUrl());
+        share.textContent = 'Lien copié !';
+      } catch (err) {
+        share.textContent = 'Lien dans la barre d\'adresse';
+      }
+      setTimeout(() => { share.textContent = label; }, 2000);
+    });
+
+    // Découpe un texte en lignes qui tiennent dans la largeur, sans perdre les retours à la ligne.
+    function wrapText(ctx, text, width) {
+      const lines = [];
+      for (const paragraph of text.split('\n')) {
+        let line = '';
+        for (const word of paragraph.split(/\s+/)) {
+          const attempt = line ? line + ' ' + word : word;
+          if (line && ctx.measureText(attempt).width > width) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = attempt;
+          }
+        }
+        lines.push(line);
+      }
+      return lines;
+    }
+
+    document.getElementById('image').addEventListener('click', async () => {
+      if (toggle.checked) {
+        // Pleine définition, quelle que soit la taille de l'écran.
+        const svg = new Image();
+        svg.src = illuminationUrl(1200);
+        await svg.decode();
+        const page = document.createElement('canvas');
+        page.width = svg.naturalWidth;
+        page.height = svg.naturalHeight;
+        page.getContext('2d').drawImage(svg, 0, 0);
+        saveCanvas(page, 'enluminure.png');
+        return;
+      }
+      await document.fonts.ready;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const W = 1200, MARGIN = 110, LINE = 58;
+      const textFont = 'italic 44px "Crimson Text", Georgia, serif';
+
+      ctx.font = textFont;
+      const lines = wrapText(ctx, current.result, W - 2 * MARGIN);
+      canvas.width = W;
+      canvas.height = 300 + lines.length * LINE + 50;
+
+      const background = ctx.createLinearGradient(0, 0, W, canvas.height);
+      background.addColorStop(0, '#fdf3d7');
+      background.addColorStop(0.5, '#f5e6b8');
+      background.addColorStop(1, '#ecdaa0');
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, W, canvas.height);
+      ctx.strokeStyle = '#c9a84c';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(28, 28, W - 56, canvas.height - 56);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#5c1a0a';
+      ctx.font = '84px UnifrakturMaguntia, "Palatino Linotype", serif';
+      ctx.fillText('Vetuste Scripteur', W / 2, 150);
+      ctx.fillStyle = '#8b4513';
+      ctx.font = '30px serif';
+      ctx.fillText('⚜ ⚜ ⚜', W / 2, 215);
+
+      ctx.fillStyle = '#2c1a0e';
+      ctx.font = textFont;
+      lines.forEach((line, i) => ctx.fillText(line, W / 2, 300 + i * LINE));
+
+      saveCanvas(canvas, 'parchemin.png');
+    });
+
+    // ─── Enluminure ───────────────────────────────────────────────────────────────────
+    // Le dessin est fait par le serveur, en SVG : le même que pour la CLI et la bibliothèque.
+
+    const view      = document.getElementById('illumination');
+    const resultBox = document.getElementById('result-box');
+    const toggle    = document.getElementById('illuminate');
+
+    function illuminationUrl(width) {
+      const params = new URLSearchParams({
+        phrase: current.original, seed: current.seed, level: current.level, largeur: width,
+      });
+      return '/enluminure.svg?' + params;
+    }
+
+    function renderView() {
+      const on = toggle.checked && current !== null;
+      resultBox.classList.toggle('illuminated', on);
+      if (!on) return;
+      view.alt = current.result;
+      view.src = illuminationUrl(Math.max(200, Math.round(view.parentElement.clientWidth)));
+    }
+
+    toggle.addEventListener('change', () => {
+      renderView();
+      if (current) history.replaceState(null, '', shareUrl());
+    });
+
+    // Redessine si la largeur change (rotation d'un téléphone, fenêtre redimensionnée).
+    let lastWidth = 0;
+    new ResizeObserver(entries => {
+      const width = entries[0].contentRect.width;
+      if (width && Math.abs(width - lastWidth) > 1) {
+        lastWidth = width;
+        renderView();
+      }
+    }).observe(resultBox);
+
+    function saveCanvas(canvas, name) {
+      canvas.toBlob(blob => {
+        const link = document.createElement('a');
+        link.download = name;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+      }, 'image/png');
+    }
+
+    // Un lien partagé rejoue exactement le même tirage.
+    const query = new URLSearchParams(location.search);
+    if (['0', '1', '2', '3'].includes(query.get('level'))) level.value = query.get('level');
+    showLevel();
+    toggle.checked = query.get('illum') === '1';
+    if (query.get('phrase')) {
+      input.value = query.get('phrase');
+      transmogrify(query.get('seed'));
+    }
+  </script>
+</body>
+</html>
