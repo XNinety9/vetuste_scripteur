@@ -48,7 +48,7 @@ Fige la version et vérifie la somme de contrôle publiée avec la release (`vet
 **`deploy/Dockerfile`**
 
 ```dockerfile
-ARG VETUSTE_VERSION=1.1.0
+ARG VETUSTE_VERSION=1.1.1
 ADD https://github.com/XNinety9/vetuste_scripteur/releases/download/v${VETUSTE_VERSION}/vetuste-scripteur.pyz /opt/vetuste/vetuste-scripteur.pyz
 ```
 

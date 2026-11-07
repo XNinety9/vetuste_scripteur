@@ -61,7 +61,7 @@ vetuste-scripteur             # quelques exemples
 
 ```console
 $ vetuste-scripteur --json --seed 4 "Madame, vous êtes très belle"
-{"original": "Madame, vous êtes très belle", "result": "Corbleu ! dame, vous estez fort belle", "seed": 4, "level": 2, "version": "1.1.0"}
+{"original": "Madame, vous êtes très belle", "result": "Corbleu ! dame, vous estez fort belle", "seed": 4, "level": 2, "version": "1.1.1"}
 ```
 
 Pour ne rien installer, `scripts/construire_pyz.py` produit `dist/vetuste-scripteur.pyz` : tout le moteur et l'enluminure en un seul fichier d'environ 160 Ko, qui demande seulement Python 3.11 ou plus. Il fonctionne aussi sous systemd, en locale `C`.

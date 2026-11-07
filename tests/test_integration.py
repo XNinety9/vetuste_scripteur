@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import zipfile
 from pathlib import Path
 
@@ -176,12 +177,13 @@ def test_archive_reproductible_et_complete(tmp_path):
     subprocess.run(construire, capture_output=True, check=True)
     sortie = RACINE / "dist"
     premiere = (sortie / "vetuste-scripteur.pyz").read_bytes()
-    # Toucher un fichier source ne doit pas changer l'archive : seul le contenu compte.
+    # Ni l'heure, ni le fuseau horaire, ni la date des fichiers ne doivent changer l'archive.
+    time.sleep(2.1)  # les dates d'un zip ont une précision de deux secondes
     source = RACINE / "vetuste_scripteur" / "__main__.py"
     dates = source.stat()
     os.utime(source, (dates.st_atime + 1000, dates.st_mtime + 1000))
     try:
-        subprocess.run(construire, capture_output=True, check=True)
+        subprocess.run(construire, capture_output=True, check=True, env={**os.environ, "TZ": "Pacific/Kiritimati"})
     finally:
         os.utime(source, (dates.st_atime, dates.st_mtime))
     assert (sortie / "vetuste-scripteur.pyz").read_bytes() == premiere

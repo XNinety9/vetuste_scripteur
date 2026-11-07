@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+- The single-file build no longer depends on the build time or the time zone: the same code gives
+  the same `vetuste-scripteur.pyz` with the same Python. The 1.1.0 build stamped the time of the
+  build inside the archive.
+
 ## 1.1.0
 
 ### Reusable component
@@ -9,7 +15,7 @@
   are read from a generated table. The installed size goes from about 486 MB to about 320 KB.
 - New `vetuste-scripteur` command with `--json`, `--seed`, `--niveau` and standard input.
 - New single-file build: `scripts/construire_pyz.py` produces `dist/vetuste-scripteur.pyz`.
-- The single-file build is reproducible and comes with its checksum. A tag publishes it as a GitHub
+- The single-file build comes with its checksum. A tag publishes it as a GitHub
   release, and `integration/printr/` explains how to plug it into Printr.
 - FastAPI is now optional, behind the `web` extra.
 - Python 3.11 or later is enough (3.14 was required).

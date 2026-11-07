@@ -15,5 +15,5 @@ from .enluminure import enluminure
 from .gravure import gravure
 from .moteur import NIVEAU_PAR_DEFAUT, NIVEAUX, translate
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __all__ = ["NIVEAUX", "NIVEAU_PAR_DEFAUT", "__version__", "enluminure", "gravure", "translate"]
